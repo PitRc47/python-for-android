@@ -1031,7 +1031,7 @@ class ToolchainCL:
             
             os.environ['GRADLE_OPTS'] = "-Xmx8g -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
             
-            gradlew = gradlew1('build')
+            gradlew = gradlew1()
             if exists('/usr/bin/dos2unix'):
                 # .../dists/bdisttest_python3/gradlew
                 # .../build/bootstrap_builds/sdl2-python3/gradlew
