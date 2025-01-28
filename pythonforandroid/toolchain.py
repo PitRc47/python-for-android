@@ -1026,6 +1026,7 @@ class ToolchainCL:
 
             env["ANDROID_NDK_HOME"] = self.ctx.ndk_dir
             env["ANDROID_HOME"] = self.ctx.sdk_dir
+            env['GRADLE_OPTS'] = "-Xmx12g -XX:MaxMetaspaceSize=2048m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
             os.environ['GRADLE_OPTS'] = "-Xmx12g -XX:MaxMetaspaceSize=2048m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
             
             gradlew = sh.Command('./gradlew')
