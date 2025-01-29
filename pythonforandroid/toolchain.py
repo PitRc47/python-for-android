@@ -1026,7 +1026,7 @@ class ToolchainCL:
 
             env["ANDROID_NDK_HOME"] = self.ctx.ndk_dir
             env["ANDROID_HOME"] = self.ctx.sdk_dir
-            env['GRADLE_OPTS'] = "-Xmx6000m -XX:MaxMetaspaceSize=4096m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8 --parallel --debug"
+            env['GRADLE_OPTS'] = "-Xmx4096m -XX:MaxMetaspaceSize=4096m -XX:+HeapDumpOnOutOfMemoryError"
             gradlew = sh.Command('./gradlew')
             if exists('/usr/bin/dos2unix'):
                 # .../dists/bdisttest_python3/gradlew
@@ -1054,8 +1054,9 @@ class ToolchainCL:
 
             # WARNING: We should make sure to clean the build directory before building.
             # See PR: kivy/python-for-android#2705
-            output = shprint(gradlew, "clean", gradle_task, _tail=20,
-                             _critical=True, _env=env)
+            clean_output = shprint(gradlew, "clean", _tail=20, _critical=True, _env=env)
+            gradle_command = [gradle_task, "--parallel", "--debug"]
+            output = shprint(gradlew, *gradle_command, _tail=20, _critical=True, _env=env)
         return output, build_args
 
     def _finish_package(self, args, output, build_args, package_type, output_dir):
