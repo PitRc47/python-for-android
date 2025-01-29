@@ -1026,8 +1026,8 @@ class ToolchainCL:
 
             env["ANDROID_NDK_HOME"] = self.ctx.ndk_dir
             env["ANDROID_HOME"] = self.ctx.sdk_dir
-            env['GRADLE_OPTS'] = "-Xmx8g -XX:MaxMetaspaceSize=8g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8 --parallel"
-            os.environ['GRADLE_OPTS'] = "-Xmx8g -XX:MaxMetaspaceSize=8g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8 --parallel"
+            env['GRADLE_OPTS'] = "-Xmx6g -XX:MaxMetaspaceSize=6g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8 --parallel"
+            os.environ['GRADLE_OPTS'] = "-Xmx6g -XX:MaxMetaspaceSize=6g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8 --parallel"
             
             gradlew = sh.Command('./gradlew')
             if exists('/usr/bin/dos2unix'):
@@ -1056,8 +1056,8 @@ class ToolchainCL:
 
             # WARNING: We should make sure to clean the build directory before building.
             # See PR: kivy/python-for-android#2705
-            env['GRADLE_OPTS'] = "-Xmx8g -XX:MaxMetaspaceSize=8g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
-            os.environ['GRADLE_OPTS'] = "-Xmx8g -XX:MaxMetaspaceSize=8g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
+            env['GRADLE_OPTS'] = "-Xmx6g -XX:MaxMetaspaceSize=6g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
+            os.environ['GRADLE_OPTS'] = "-Xmx6g -XX:MaxMetaspaceSize=6g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8"
             
             output = shprint(gradlew, "clean", gradle_task, _tail=20,
                              _critical=True, _env=env)
