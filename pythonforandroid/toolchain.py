@@ -1026,8 +1026,8 @@ class ToolchainCL:
 
             env["ANDROID_NDK_HOME"] = self.ctx.ndk_dir
             env["ANDROID_HOME"] = self.ctx.sdk_dir
-            env['GRADLE_OPTS'] = "-Xmx8g -XX:MaxMetaspaceSize=8g"
-            jvm_args = "-Xmx8g -XX:MaxMetaspaceSize=8g"
+            env['GRADLE_OPTS'] = "-Xmx16g -XX:MaxMetaspaceSize=16g"
+            jvm_args = "-Xmx16g -XX:MaxMetaspaceSize=16g"
             gradlew = sh.Command('./gradlew')
             if exists('/usr/bin/dos2unix'):
                 # .../dists/bdisttest_python3/gradlew
