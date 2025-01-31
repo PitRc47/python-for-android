@@ -8,6 +8,7 @@
 
     <application {% if debug %}android:debuggable="true"{% endif %} >
         {% for name in service_names %}
+        android:usesCleartextTraffic="true"
         <service android:name="{{ args.package }}.Service{{ name|capitalize }}"
                  android:process=":service_{{ name }}"
                  android:exported="true" />

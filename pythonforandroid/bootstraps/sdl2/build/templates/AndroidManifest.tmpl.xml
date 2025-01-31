@@ -52,6 +52,7 @@
                  {% if debug %}android:debuggable="true"{% endif %}
                  android:icon="@mipmap/icon"
                  android:allowBackup="{{ args.allow_backup }}"
+                 android:usesCleartextTraffic="true"
                  {% if args.backup_rules %}android:fullBackupContent="@xml/{{ args.backup_rules }}"{% endif %}
                  {{ args.extra_manifest_application_arguments }}
                  android:theme="{{args.android_apptheme}}{% if not args.window %}.Fullscreen{% endif %}"
