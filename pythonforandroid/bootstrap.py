@@ -10,8 +10,7 @@ import shutil
 
 from pythonforandroid.logger import (shprint, info, logger, debug)
 from pythonforandroid.util import (
-    current_directory, ensure_dir, temp_directory, BuildInterruptingException,
-    rmdir, move)
+    current_directory, ensure_dir, temp_directory, BuildInterruptingException)
 from pythonforandroid.recipe import Recipe
 
 
@@ -71,6 +70,7 @@ class Bootstrap:
     '''An Android project template, containing recipe stuff for
     compilation and templated fields for APK info.
     '''
+    name = ''
     jni_subdir = '/jni'
     ctx = None
 
@@ -395,9 +395,9 @@ class Bootstrap:
             if isdir(rd) and d.endswith('.egg'):
                 info('  ' + d)
                 files = [join(rd, f) for f in listdir(rd) if f != 'EGG-INFO']
-                for f in files:
-                    move(f, sitepackages)
-                rmdir(d)
+                if files:
+                    shprint(sh.mv, '-t', sitepackages, *files)
+                shprint(sh.rm, '-rf', d)
 
 
 def expand_dependencies(recipes, ctx):

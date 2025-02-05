@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 
-import os
-import platform
-import shutil
-import subprocess
 import sys
-
+import platform
+import os
+import subprocess
+import shutil
 from pythonforandroid.logger import info, warning, error
-from pythonforandroid.util import ensure_dir
 
 
 class Prerequisite(object):
@@ -151,7 +149,7 @@ class JDKPrerequisite(Prerequisite):
     name = "JDK"
     mandatory = dict(linux=False, darwin=True)
     installer_is_supported = dict(linux=False, darwin=True)
-    supported_version = 17
+    min_supported_version = 11
 
     def darwin_checker(self):
         if "JAVA_HOME" in os.environ:
@@ -197,21 +195,21 @@ class JDKPrerequisite(Prerequisite):
         res = _stdout_res.strip().decode()
 
         major_version = int(res.split(" ")[-1].split(".")[0])
-        if major_version == self.supported_version:
+        if major_version >= self.min_supported_version:
             info(f"Found a valid JDK at {jdk_path}")
             return True
         else:
-            error(f"JDK version {major_version} is not supported")
+            error(f"JDK {self.min_supported_version} or higher is required")
             return False
 
     def darwin_helper(self):
         info(
-            f"python-for-android requires a JDK {self.supported_version} to be installed on macOS,"
+            "python-for-android requires a JDK 11 or higher to be installed on macOS,"
             "but seems like you don't have one installed."
         )
         info(
             "If you think that a valid JDK is already installed, please verify that "
-            f"you have a JDK {self.supported_version} installed and that `/usr/libexec/java_home` "
+            "you have a JDK 11 or higher installed and that `/usr/libexec/java_home` "
             "shows the correct path."
         )
         info(
@@ -221,12 +219,12 @@ class JDKPrerequisite(Prerequisite):
 
     def darwin_installer(self):
         info(
-            f"Looking for a JDK {self.supported_version} installation which is not the default one ..."
+            "Looking for a JDK 11 or higher installation which is not the default one ..."
         )
-        jdk_path = self._darwin_get_libexec_jdk_path(version=str(self.supported_version))
+        jdk_path = self._darwin_get_libexec_jdk_path(version="11+")
 
         if not self._darwin_jdk_is_supported(jdk_path):
-            info(f"We're unlucky, there's no JDK {self.supported_version} or higher installation available")
+            info("We're unlucky, there's no JDK 11 or higher installation available")
 
             base_url = "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.2%2B8/"
             if platform.machine() == "arm64":
@@ -249,7 +247,13 @@ class JDKPrerequisite(Prerequisite):
                 "~/Library/Java/JavaVirtualMachines"
             )
             info(f"Extracting {filename} to {user_library_java_path}")
-            ensure_dir(user_library_java_path)
+            subprocess.check_output(
+                [
+                    "mkdir",
+                    "-p",
+                    user_library_java_path,
+                ],
+            )
             subprocess.check_output(
                 ["tar", "xzf", f"/tmp/{filename}", "-C", user_library_java_path],
             )
@@ -366,19 +370,22 @@ class CmakePrerequisite(Prerequisite):
 
 
 def get_required_prerequisites(platform="linux"):
-    return [
-        prerequisite_cls()
-        for prerequisite_cls in [
-            HomebrewPrerequisite,
-            AutoconfPrerequisite,
-            AutomakePrerequisite,
-            LibtoolPrerequisite,
-            PkgConfigPrerequisite,
-            CmakePrerequisite,
-            OpenSSLPrerequisite,
-            JDKPrerequisite,
-        ] if prerequisite_cls.mandatory.get(platform, False)
-    ]
+    DEFAULT_PREREQUISITES = dict(
+        darwin=[
+            HomebrewPrerequisite(),
+            AutoconfPrerequisite(),
+            AutomakePrerequisite(),
+            LibtoolPrerequisite(),
+            PkgConfigPrerequisite(),
+            CmakePrerequisite(),
+            OpenSSLPrerequisite(),
+            JDKPrerequisite(),
+        ],
+        linux=[],
+        all_platforms=[],
+    )
+
+    return DEFAULT_PREREQUISITES["all_platforms"] + DEFAULT_PREREQUISITES[platform]
 
 
 def check_and_install_default_prerequisites():

@@ -28,7 +28,7 @@ class TestBuildBasic(unittest.TestCase):
 
     def test_strip_if_with_debug_symbols(self):
         ctx = mock.Mock()
-        ctx.python_recipe.major_minor_version_string = "3.6"
+        ctx.python_recipe.major_minor_version_string = "python3.6"
         ctx.get_site_packages_dir.return_value = "test-doesntexist"
         ctx.build_dir = "nonexistant_directory"
         ctx.archs = ["arm64"]
@@ -36,10 +36,10 @@ class TestBuildBasic(unittest.TestCase):
         modules = ["mymodule"]
         project_dir = None
         with mock.patch('pythonforandroid.build.info'), \
-                mock.patch('sh.Command'), \
-                mock.patch('pythonforandroid.build.open'), \
-                mock.patch('pythonforandroid.build.shprint'), \
-                mock.patch('pythonforandroid.build.current_directory'), \
+                mock.patch('sh.Command'),\
+                mock.patch('pythonforandroid.build.open'),\
+                mock.patch('pythonforandroid.build.shprint'),\
+                mock.patch('pythonforandroid.build.current_directory'),\
                 mock.patch('pythonforandroid.build.CythonRecipe') as m_CythonRecipe, \
                 mock.patch('pythonforandroid.build.project_has_setup_py') as m_project_has_setup_py, \
                 mock.patch('pythonforandroid.build.run_setuppy_install'):

@@ -3,6 +3,7 @@
      com.gamemaker.game
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="{{ args.package }}"
       android:versionCode="{{ args.numeric_version }}"
       android:versionName="{{ args.version }}"
       android:installLocation="auto">
@@ -52,7 +53,6 @@
                  {% if debug %}android:debuggable="true"{% endif %}
                  android:icon="@mipmap/icon"
                  android:allowBackup="{{ args.allow_backup }}"
-                 android:usesCleartextTraffic="true"
                  {% if args.backup_rules %}android:fullBackupContent="@xml/{{ args.backup_rules }}"{% endif %}
                  {{ args.extra_manifest_application_arguments }}
                  android:theme="{{args.android_apptheme}}{% if not args.window %}.Fullscreen{% endif %}"

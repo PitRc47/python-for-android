@@ -1,6 +1,4 @@
 import os
-from pathlib import Path
-from tempfile import TemporaryDirectory
 import types
 import unittest
 from unittest import mock
@@ -26,7 +24,6 @@ class TestUtil(unittest.TestCase):
     @mock.patch("shutil.rmtree")
     @mock.patch("pythonforandroid.util.mkdtemp")
     def test_temp_directory(self, mock_mkdtemp, mock_shutil_rmtree):
-
         """
         Basic test for method :meth:`~pythonforandroid.util.temp_directory`. We
         perform this test by `mocking` the command `mkdtemp` and
@@ -139,94 +136,3 @@ class TestUtil(unittest.TestCase):
         )
         with self.assertRaises(SystemExit):
             util.handle_build_exception(exc)
-
-    def test_move(self):
-        with mock.patch(
-                "pythonforandroid.util.LOGGER"
-        ) as m_logger, TemporaryDirectory() as base_dir:
-            new_path = Path(base_dir) / "new"
-
-            # Set up source
-            old_path = Path(base_dir) / "old"
-            with open(old_path, "w") as outfile:
-                outfile.write("Temporary content")
-
-            # Non existent source
-            with self.assertRaises(FileNotFoundError):
-                util.move(new_path, new_path)
-            m_logger.debug.assert_called()
-            m_logger.error.assert_not_called()
-            m_logger.reset_mock()
-            assert old_path.exists()
-            assert not new_path.exists()
-
-            # Successful move
-            util.move(old_path, new_path)
-            assert not old_path.exists()
-            assert new_path.exists()
-            m_logger.debug.assert_called()
-            m_logger.error.assert_not_called()
-            m_logger.reset_mock()
-
-            # Move over existing:
-            existing_path = Path(base_dir) / "existing"
-            existing_path.touch()
-
-            util.move(new_path, existing_path)
-            with open(existing_path, "r") as infile:
-                assert infile.read() == "Temporary content"
-            m_logger.debug.assert_called()
-            m_logger.error.assert_not_called()
-            m_logger.reset_mock()
-
-    def test_touch(self):
-        # Just checking the new file case.
-        # Assume the existing file timestamp case will work if this does.
-        with TemporaryDirectory() as base_dir:
-            new_file_path = Path(base_dir) / "new_file"
-            assert not new_file_path.exists()
-            util.touch(new_file_path)
-            assert new_file_path.exists()
-
-    def test_build_tools_version_sort_key(self):
-
-        build_tools_versions = [
-            "26.0.1",
-            "26.0.0",
-            "26.0.2",
-            "32.0.0 rc1",
-            "31.0.0",
-            "999something",
-        ]
-
-        expected_result = [
-            "999something",  # invalid version
-            "26.0.0",
-            "26.0.1",
-            "26.0.2",
-            "31.0.0",
-            "32.0.0 rc1",
-        ]
-
-        result = sorted(
-            build_tools_versions, key=util.build_tools_version_sort_key
-        )
-
-        self.assertEqual(result, expected_result)
-
-    def test_max_build_tool_version(self):
-
-        build_tools_versions = [
-            "26.0.1",
-            "26.0.0",
-            "26.0.2",
-            "32.0.0 rc1",
-            "31.0.0",
-            "999something",
-        ]
-
-        expected_result = "32.0.0 rc1"
-
-        result = util.max_build_tool_version(build_tools_versions)
-
-        self.assertEqual(result, expected_result)

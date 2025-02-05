@@ -32,8 +32,8 @@ to build the supported app modes::
 
 import os
 import sys
-
-from setuptools import setup, find_packages
+from distutils.core import setup
+from setuptools import find_packages
 
 # define a basic test app, which can be override passing the proper args to cli
 options = {

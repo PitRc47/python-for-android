@@ -1,9 +1,8 @@
 import os
 import sh
-
-from pythonforandroid.logger import info
 from pythonforandroid.recipe import CompiledComponentsPythonRecipe
-from pythonforandroid.util import current_directory, ensure_dir, touch
+from pythonforandroid.util import (current_directory, ensure_dir)
+from pythonforandroid.logger import (info, shprint)
 
 
 class ReportLabRecipe(CompiledComponentsPythonRecipe):
@@ -29,7 +28,7 @@ class ReportLabRecipe(CompiledComponentsPythonRecipe):
 
             # Apply patches:
             self.apply_patch('patches/fix-setup.patch', arch.arch)
-            touch(os.path.join(recipe_dir, '.patched'))
+            shprint(sh.touch, os.path.join(recipe_dir, '.patched'))
             ft = self.get_recipe('freetype', self.ctx)
             ft_dir = ft.get_build_dir(arch.arch)
             ft_lib_dir = os.environ.get('_FT_LIB_', os.path.join(ft_dir, 'objs', '.libs'))

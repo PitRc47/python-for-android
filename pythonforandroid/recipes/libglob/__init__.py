@@ -2,14 +2,11 @@
     android libglob
     available via '-lglob' LDFLAG
 """
-from os.path import join
-
-import sh
-
-from pythonforandroid.logger import shprint
+from os.path import exists, join
 from pythonforandroid.recipe import Recipe
 from pythonforandroid.toolchain import current_directory
-from pythonforandroid.util import ensure_dir
+from pythonforandroid.logger import info, shprint
+import sh
 
 
 class LibGlobRecipe(Recipe):
@@ -35,7 +32,9 @@ class LibGlobRecipe(Recipe):
     def prebuild_arch(self, arch):
         """Make the build and target directories"""
         path = self.get_build_dir(arch.arch)
-        ensure_dir(path)
+        if not exists(path):
+            info("creating {}".format(path))
+            shprint(sh.mkdir, '-p', path)
 
     def build_arch(self, arch):
         """simple shared compile"""
@@ -44,7 +43,9 @@ class LibGlobRecipe(Recipe):
                 self.get_build_dir(arch.arch),
                 join(self.ctx.python_recipe.get_build_dir(arch.arch), 'Lib'),
                 join(self.ctx.python_recipe.get_build_dir(arch.arch), 'Include')):
-            ensure_dir(path)
+            if not exists(path):
+                info("creating {}".format(path))
+                shprint(sh.mkdir, '-p', path)
         cli = env['CC'].split()[0]
         # makes sure first CC command is the compiler rather than ccache, refs:
         # https://github.com/kivy/python-for-android/issues/1399

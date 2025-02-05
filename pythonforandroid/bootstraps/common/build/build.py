@@ -17,10 +17,9 @@ import tarfile
 import tempfile
 import time
 
+from distutils.version import LooseVersion
 from fnmatch import fnmatch
 import jinja2
-
-from pythonforandroid.util import rmdir, ensure_dir, max_build_tool_version
 
 
 def get_dist_info_for(key, error_if_missing=True):
@@ -83,7 +82,7 @@ else:
 if PYTHON is not None and not exists(PYTHON):
     PYTHON = None
 
-if _bootstrap_name in ('sdl2', 'webview', 'service_only', 'qt'):
+if _bootstrap_name in ('sdl2', 'webview', 'service_only'):
     WHITELIST_PATTERNS.append('pyconfig.h')
 
 environment = jinja2.Environment(loader=jinja2.FileSystemLoader(
@@ -92,6 +91,11 @@ environment = jinja2.Environment(loader=jinja2.FileSystemLoader(
 
 DEFAULT_PYTHON_ACTIVITY_JAVA_CLASS = 'org.kivy.android.PythonActivity'
 DEFAULT_PYTHON_SERVICE_JAVA_CLASS = 'org.kivy.android.PythonService'
+
+
+def ensure_dir(path):
+    if not exists(path):
+        makedirs(path)
 
 
 def render(template, dest, **kwargs):
@@ -237,7 +241,7 @@ main.py that loads it.''')
     assets_dir = "src/main/assets"
 
     # Delete the old assets.
-    rmdir(assets_dir, ignore_errors=True)
+    shutil.rmtree(assets_dir, ignore_errors=True)
     ensure_dir(assets_dir)
 
     # Add extra environment variable file into tar-able directory:
@@ -286,7 +290,7 @@ main.py that loads it.''')
                                     not exists(
                                         join(main_py_only_dir, dir_path)
                                     )):
-                                ensure_dir(join(main_py_only_dir, dir_path))
+                                os.mkdir(join(main_py_only_dir, dir_path))
                             # Copy actual file:
                             shutil.copyfile(
                                 join(args.private, variant),
@@ -324,17 +328,17 @@ main.py that loads it.''')
             )
     finally:
         for directory in _temp_dirs_to_clean:
-            rmdir(directory)
+            shutil.rmtree(directory)
 
     # Remove extra env vars tar-able directory:
-    rmdir(env_vars_tarpath)
+    shutil.rmtree(env_vars_tarpath)
 
     # Prepare some variables for templating process
     res_dir = "src/main/res"
     res_dir_initial = "src/res_initial"
     # make res_dir stateless
     if exists(res_dir_initial):
-        rmdir(res_dir, ignore_errors=True)
+        shutil.rmtree(res_dir, ignore_errors=True)
         shutil.copytree(res_dir_initial, res_dir)
     else:
         shutil.copytree(res_dir, res_dir_initial)
@@ -511,7 +515,9 @@ main.py that loads it.''')
     # Try to build with the newest available build tools
     ignored = {".DS_Store", ".ds_store"}
     build_tools_versions = [x for x in listdir(join(sdk_dir, 'build-tools')) if x not in ignored]
-    build_tools_version = max_build_tool_version(build_tools_versions)
+    build_tools_versions = sorted(build_tools_versions,
+                                  key=LooseVersion)
+    build_tools_version = build_tools_versions[-1]
 
     # Folder name for launcher (used by SDL2 bootstrap)
     url_scheme = 'kivy'
@@ -543,7 +549,6 @@ main.py that loads it.''')
     }
     if get_bootstrap_name() == "sdl2":
         render_args["url_scheme"] = url_scheme
-
     render(
         'AndroidManifest.tmpl.xml',
         manifest_path,
@@ -572,8 +577,7 @@ main.py that loads it.''')
     render(
         'gradle.tmpl.properties',
         'gradle.properties',
-        args=args,
-        bootstrap_name=get_bootstrap_name())
+        args=args)
 
     # ant build templates
     render(
@@ -602,26 +606,6 @@ main.py that loads it.''')
         'strings.tmpl.xml',
         join(res_dir, 'values/strings.xml'),
         **render_args)
-
-    # Library resources from Qt
-    # These are referred by QtLoader.java in Qt6AndroidBindings.jar
-    # qt_libs and load_local_libs are loaded at App startup
-    if get_bootstrap_name() == "qt":
-        qt_libs = args.qt_libs.split(",")
-        load_local_libs = args.load_local_libs.split(",")
-        init_classes = args.init_classes
-        if init_classes:
-            init_classes = init_classes.split(",")
-            init_classes = ":".join(init_classes)
-        arch = get_dist_info_for("archs")[0]
-        render(
-            'libs.tmpl.xml',
-            join(res_dir, 'values/libs.xml'),
-            qt_libs=qt_libs,
-            load_local_libs=load_local_libs,
-            init_classes=init_classes,
-            arch=arch
-        )
 
     if exists(join("templates", "custom_rules.tmpl.xml")):
         render(
@@ -973,14 +957,6 @@ tools directory of the Android SDK.
                     help='Use that parameter if you need to implement your own PythonServive Java class')
     ap.add_argument('--activity-class-name', dest='activity_class_name', default=DEFAULT_PYTHON_ACTIVITY_JAVA_CLASS,
                     help='The full java class name of the main activity')
-    if get_bootstrap_name() == "qt":
-        ap.add_argument('--qt-libs', dest='qt_libs', required=True,
-                        help='comma separated list of Qt libraries to be loaded')
-        ap.add_argument('--load-local-libs', dest='load_local_libs', required=True,
-                        help='comma separated list of Qt plugin libraries to be loaded')
-        ap.add_argument('--init-classes', dest='init_classes', default='',
-                        help='comma separated list of java class names to be loaded from the Qt jar files, '
-                             'specified through add_jar cli option')
 
     return ap
 
@@ -1030,7 +1006,7 @@ def parse_args_and_make_package(args=None):
         print('Billing not yet supported!')
         sys.exit(1)
 
-    if args.sdk_version != -1:
+    if args.sdk_version == -1:
         print('WARNING: Received a --sdk argument, but this argument is '
               'deprecated and does nothing.')
         args.sdk_version = -1  # ensure it is not used
@@ -1082,4 +1058,6 @@ def parse_args_and_make_package(args=None):
 
 
 if __name__ == "__main__":
+    if get_bootstrap_name() in ('sdl2', 'webview', 'service_only'):
+        WHITELIST_PATTERNS.append('pyconfig.h')
     parse_args_and_make_package()

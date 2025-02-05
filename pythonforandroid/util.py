@@ -1,22 +1,14 @@
 import contextlib
-from fnmatch import fnmatch
-import logging
 from os.path import exists, join
-from os import getcwd, chdir, makedirs, walk
-from pathlib import Path
-from platform import uname
+from os import getcwd, chdir, makedirs, walk, uname
 import shutil
+from fnmatch import fnmatch
 from tempfile import mkdtemp
-
-import packaging.version
-
 from pythonforandroid.logger import (logger, Err_Fore, error, info)
 
-LOGGER = logging.getLogger("p4a.util")
 
-build_platform = "{system}-{machine}".format(
-    system=uname().system, machine=uname().machine
-).lower()
+build_platform = '{system}-{machine}'.format(
+    system=uname()[0], machine=uname()[-1]).lower()
 """the build platform in the format `system-machine`. We use
 this string to define the right build system when compiling some recipes or
 to get the right path for clang compiler"""
@@ -45,6 +37,11 @@ def temp_directory():
         shutil.rmtree(temp_dir)
         logger.debug(''.join((Err_Fore.CYAN, ' - temp directory deleted ',
                               temp_dir, Err_Fore.RESET)))
+
+
+def ensure_dir(filename):
+    if not exists(filename):
+        makedirs(filename)
 
 
 def walk_valid_filens(base_dir, invalid_dir_names, invalid_file_patterns):
@@ -107,59 +104,3 @@ def handle_build_exception(exception):
     if exception.instructions is not None:
         info('Instructions: {}'.format(exception.instructions))
     exit(1)
-
-
-def rmdir(dn, ignore_errors=False):
-    if not exists(dn):
-        return
-    LOGGER.debug("Remove directory and subdirectory {}".format(dn))
-    shutil.rmtree(dn, ignore_errors)
-
-
-def ensure_dir(dn):
-    if exists(dn):
-        return
-    LOGGER.debug("Create directory {0}".format(dn))
-    makedirs(dn)
-
-
-def move(source, destination):
-    LOGGER.debug("Moving {} to {}".format(source, destination))
-    shutil.move(source, destination)
-
-
-def touch(filename):
-    Path(filename).touch()
-
-
-def build_tools_version_sort_key(
-    version_string: str,
-) -> packaging.version.Version:
-    """
-    Returns a packaging.version.Version object for comparison purposes.
-    It includes canonicalization of the version string to allow for
-    comparison of versions with spaces in them (historically, RC candidates)
-
-    If the version string is invalid, it returns a version object with
-    version 0, which will be sorted at worst position.
-    """
-
-    try:
-        # Historically, Android build release candidates have had
-        # spaces in the version number.
-        return packaging.version.Version(version_string.replace(" ", ""))
-    except packaging.version.InvalidVersion:
-        # Put badly named versions at worst position.
-        return packaging.version.Version("0")
-
-
-def max_build_tool_version(
-    build_tools_versions: list,
-) -> str:
-    """
-    Returns the maximum build tools version from a list of build tools
-    versions. It uses the :meth:`build_tools_version_sort_key` function to
-    canonicalize the version strings and then returns the maximum version.
-    """
-
-    return max(build_tools_versions, key=build_tools_version_sort_key)

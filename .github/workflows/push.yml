@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout python-for-android
-      uses: actions/checkout@v4
+      uses: actions/checkout@v3
     - name: Set up Python 3.x
       uses: actions/setup-python@v4
       with:
@@ -32,11 +32,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11']
+        python-version: ['3.7', '3.8', '3.9', '3.10']
         os: [ubuntu-latest, macOs-latest]
     steps:
     - name: Checkout python-for-android
-      uses: actions/checkout@v4
+      uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
@@ -70,11 +70,9 @@ jobs:
             target: testapps-webview
           - name: service_library
             target: testapps-service_library-aar
-          - name: qt
-            target: testapps-qt
     steps:
     - name: Checkout python-for-android
-      uses: actions/checkout@v4
+      uses: actions/checkout@v3
     - name: Build python-for-android docker image
       run: |
         docker build --tag=kivy/python-for-android .
@@ -123,7 +121,7 @@ jobs:
       ANDROID_NDK_HOME: ${HOME}/.android/android-ndk
     steps:
       - name: Checkout python-for-android
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
       - name: Install python-for-android
         run: |
           source ci/osx_ci.sh
@@ -172,7 +170,7 @@ jobs:
       REBUILD_UPDATED_RECIPES_EXTRA_ARGS: --arch=${{ matrix.android_arch }}
     steps:
     - name: Checkout python-for-android (all-history)
-      uses: actions/checkout@v4
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
     # helps with GitHub runner getting out of space
@@ -208,7 +206,7 @@ jobs:
       REBUILD_UPDATED_RECIPES_EXTRA_ARGS: --arch=${{ matrix.android_arch }}
     steps:
       - name: Checkout python-for-android (all-history)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Install python-for-android
@@ -240,17 +238,3 @@ jobs:
       uses: AndreMiras/coveralls-python-action@develop
       with:
         parallel-finished: true
-
-  documentation:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - name: Requirements
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r doc/requirements.txt
-    - name: Check links
-      run: sphinx-build -b linkcheck doc/source doc/build
-    - name: Generate documentation
-      run: sphinx-build doc/source doc/build
-

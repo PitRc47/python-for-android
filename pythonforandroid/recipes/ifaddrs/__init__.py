@@ -1,13 +1,10 @@
 """ ifaddrs for Android
 """
-from os.path import join
-
+from os.path import join, exists
 import sh
-
-from pythonforandroid.logger import shprint
+from pythonforandroid.logger import info, shprint
 from pythonforandroid.recipe import CompiledComponentsPythonRecipe
 from pythonforandroid.toolchain import current_directory
-from pythonforandroid.util import ensure_dir
 
 
 class IFAddrRecipe(CompiledComponentsPythonRecipe):
@@ -22,7 +19,9 @@ class IFAddrRecipe(CompiledComponentsPythonRecipe):
     def prebuild_arch(self, arch):
         """Make the build and target directories"""
         path = self.get_build_dir(arch.arch)
-        ensure_dir(path)
+        if not exists(path):
+            info("creating {}".format(path))
+            shprint(sh.mkdir, '-p', path)
 
     def build_arch(self, arch):
         """simple shared compile"""
@@ -31,7 +30,9 @@ class IFAddrRecipe(CompiledComponentsPythonRecipe):
                 self.get_build_dir(arch.arch),
                 join(self.ctx.python_recipe.get_build_dir(arch.arch), 'Lib'),
                 join(self.ctx.python_recipe.get_build_dir(arch.arch), 'Include')):
-            ensure_dir(path)
+            if not exists(path):
+                info("creating {}".format(path))
+                shprint(sh.mkdir, '-p', path)
         cli = env['CC'].split()[0]
         # makes sure first CC command is the compiler rather than ccache, refs:
         # https://github.com/kivy/python-for-android/issues/1398

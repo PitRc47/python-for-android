@@ -33,16 +33,6 @@ BROKEN_RECIPES_PYTHON3 = set([
     'twisted',
     # genericndkbuild is incompatible with sdl2 (which is build by default when targeting sdl2 bootstrap)
     'genericndkbuild',
-    # libmysqlclient gives a linker failure (See issue #2808)
-    'libmysqlclient',
-    # boost gives errors (requires numpy? syntax error in .jam?)
-    'boost',
-    # libtorrent gives errors (requires boost. Also, see issue #2809, to start with)
-    'libtorrent',
-    # pybind11 build fails on macos
-    'pybind11',
-    # pygame (likely need to be updated) is broken with newer SDL2 versions
-    'pygame',
 ])
 
 BROKEN_RECIPES = {

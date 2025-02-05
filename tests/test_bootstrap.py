@@ -144,9 +144,9 @@ class TestBootstrapBasic(BaseClassSetupBootstrap, unittest.TestCase):
         """A test which will initialize a bootstrap and will check if the
         method :meth:`~pythonforandroid.bootstrap.Bootstrap.all_bootstraps `
         returns the expected values, which should be: `empty", `service_only`,
-        `webview`, `sdl2` and `qt`
+        `webview` and `sdl2`
         """
-        expected_bootstraps = {"empty", "service_only", "service_library", "webview", "sdl2", "qt"}
+        expected_bootstraps = {"empty", "service_only", "service_library", "webview", "sdl2"}
         set_of_bootstraps = Bootstrap.all_bootstraps()
         self.assertEqual(
             expected_bootstraps, expected_bootstraps & set_of_bootstraps
@@ -344,7 +344,6 @@ class GenericBootstrapTest(BaseClassSetupBootstrap):
         name of the bootstrap to test"""
         raise NotImplementedError("Not implemented in GenericBootstrapTest")
 
-    @mock.patch("pythonforandroid.bootstraps.qt.open", create=True)
     @mock.patch("pythonforandroid.bootstraps.service_only.open", create=True)
     @mock.patch("pythonforandroid.bootstraps.webview.open", create=True)
     @mock.patch("pythonforandroid.bootstraps.sdl2.open", create=True)
@@ -353,16 +352,12 @@ class GenericBootstrapTest(BaseClassSetupBootstrap):
     @mock.patch("pythonforandroid.util.exists")
     @mock.patch("pythonforandroid.util.chdir")
     @mock.patch("pythonforandroid.bootstrap.listdir")
-    @mock.patch("pythonforandroid.bootstraps.sdl2.rmdir")
-    @mock.patch("pythonforandroid.bootstraps.service_only.rmdir")
-    @mock.patch("pythonforandroid.bootstraps.webview.rmdir")
+    @mock.patch("pythonforandroid.bootstrap.sh.rm")
     @mock.patch("pythonforandroid.bootstrap.sh.cp")
     def test_assemble_distribution(
         self,
         mock_sh_cp,
-        mock_rmdir1,
-        mock_rmdir2,
-        mock_rmdir3,
+        mock_sh_rm,
         mock_listdir,
         mock_chdir,
         mock_ensure_dir,
@@ -371,7 +366,6 @@ class GenericBootstrapTest(BaseClassSetupBootstrap):
         mock_open_sdl2_files,
         mock_open_webview_files,
         mock_open_service_only_files,
-        mock_open_qt_files
     ):
         """
         A test for any overwritten method of
@@ -412,7 +406,6 @@ class GenericBootstrapTest(BaseClassSetupBootstrap):
             "sdl2": mock_open_sdl2_files,
             "webview": mock_open_webview_files,
             "service_only": mock_open_service_only_files,
-            "qt": mock_open_qt_files
         }
         expected_open_calls = {
             "sdl2": [
@@ -421,7 +414,6 @@ class GenericBootstrapTest(BaseClassSetupBootstrap):
             ],
             "webview": [mock.call("local.properties", "w")],
             "service_only": [mock.call("local.properties", "w")],
-            "qt": [mock.call("local.properties", "w")]
         }
         mock_open_bs = mock_open_bootstraps[self.bootstrap_name]
         # test that the expected calls has been called
@@ -441,6 +433,7 @@ class GenericBootstrapTest(BaseClassSetupBootstrap):
             )
 
         # check that the other mocks we made are actually called
+        mock_sh_rm.assert_called()
         mock_sh_cp.assert_called()
         mock_chdir.assert_called()
         mock_listdir.assert_called()
@@ -527,15 +520,15 @@ class GenericBootstrapTest(BaseClassSetupBootstrap):
     @mock.patch("pythonforandroid.bootstrap.shprint")
     @mock.patch("pythonforandroid.bootstrap.sh.Command")
     @mock.patch("pythonforandroid.build.ensure_dir")
-    @mock.patch("shutil.which")
+    @mock.patch("pythonforandroid.archs.find_executable")
     def test_bootstrap_strip(
         self,
-        mock_shutil_which,
+        mock_find_executable,
         mock_ensure_dir,
         mock_sh_command,
         mock_sh_print,
     ):
-        mock_shutil_which.return_value = os.path.join(
+        mock_find_executable.return_value = os.path.join(
             self.ctx._ndk_dir,
             f"toolchains/llvm/prebuilt/{self.ctx.ndk.host_tag}/bin/clang",
         )
@@ -548,9 +541,10 @@ class GenericBootstrapTest(BaseClassSetupBootstrap):
         # test that strip_libraries runs with a fake distribution
         bs.strip_libraries(arch)
 
+        mock_find_executable.assert_called_once()
         self.assertEqual(
-            mock_shutil_which.call_args[0][0],
-            mock_shutil_which.return_value,
+            mock_find_executable.call_args[0][0],
+            mock_find_executable.return_value,
         )
         mock_sh_command.assert_called_once_with(
             os.path.join(
@@ -564,11 +558,11 @@ class GenericBootstrapTest(BaseClassSetupBootstrap):
         mock_sh_print.assert_called()
 
     @mock.patch("pythonforandroid.bootstrap.listdir")
-    @mock.patch("pythonforandroid.bootstrap.rmdir")
-    @mock.patch("pythonforandroid.bootstrap.move")
+    @mock.patch("pythonforandroid.bootstrap.sh.rm")
+    @mock.patch("pythonforandroid.bootstrap.sh.mv")
     @mock.patch("pythonforandroid.bootstrap.isdir")
     def test_bootstrap_fry_eggs(
-        self, mock_isdir, mock_move, mock_rmdir, mock_listdir
+        self, mock_isdir, mock_sh_mv, mock_sh_rm, mock_listdir
     ):
         mock_listdir.return_value = [
             "jnius",
@@ -596,11 +590,11 @@ class GenericBootstrapTest(BaseClassSetupBootstrap):
             ]
         )
         self.assertEqual(
-            mock_rmdir.call_args[0][0], "pyjnius-1.2.1.dev0-py3.7.egg"
+            mock_sh_rm.call_args[0][1], "pyjnius-1.2.1.dev0-py3.7.egg"
         )
         # check that the other mocks we made are actually called
         mock_isdir.assert_called()
-        mock_move.assert_called()
+        mock_sh_mv.assert_called()
 
 
 class TestBootstrapSdl2(GenericBootstrapTest, unittest.TestCase):
@@ -663,15 +657,3 @@ class TestBootstrapEmpty(GenericBootstrapTest, unittest.TestCase):
         with self.assertRaises(SystemExit) as e:
             bs.assemble_distribution()
         self.assertEqual(e.exception.args[0], 1)
-
-
-class TestBootstrapQt(GenericBootstrapTest, unittest.TestCase):
-    """
-    An inherited class of `GenericBootstrapTest` and `unittest.TestCase` which
-    will be used to perform tests for
-    :class:`~pythonforandroid.bootstraps.qt.BootstrapQt`.
-    """
-
-    @property
-    def bootstrap_name(self):
-        return "qt"

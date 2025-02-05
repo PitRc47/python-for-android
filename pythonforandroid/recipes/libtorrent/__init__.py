@@ -1,11 +1,8 @@
+from pythonforandroid.toolchain import Recipe, shprint, shutil, current_directory
 from multiprocessing import cpu_count
-from os import listdir, walk
 from os.path import join, basename
-import shutil
-
+from os import listdir, walk
 import sh
-
-from pythonforandroid.toolchain import Recipe, shprint, current_directory
 
 # This recipe builds libtorrent with Python bindings
 # It depends on Boost.Build and the source of several Boost libraries present

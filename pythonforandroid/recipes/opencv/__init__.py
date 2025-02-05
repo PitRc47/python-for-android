@@ -1,11 +1,9 @@
-from multiprocessing import cpu_count
 from os.path import join
-
 import sh
-
-from pythonforandroid.logger import shprint
 from pythonforandroid.recipe import NDKRecipe
-from pythonforandroid.util import current_directory, ensure_dir
+from pythonforandroid.util import current_directory
+from pythonforandroid.logger import shprint
+from multiprocessing import cpu_count
 
 
 class OpenCVRecipe(NDKRecipe):
@@ -47,7 +45,7 @@ class OpenCVRecipe(NDKRecipe):
 
     def build_arch(self, arch):
         build_dir = join(self.get_build_dir(arch.arch), 'build')
-        ensure_dir(build_dir)
+        shprint(sh.mkdir, '-p', build_dir)
 
         opencv_extras = []
         if 'opencv_extras' in self.ctx.recipe_build_order:

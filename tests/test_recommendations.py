@@ -2,7 +2,6 @@ import unittest
 from os.path import join
 from sys import version as py_version
 
-import packaging.version
 from unittest import mock
 from pythonforandroid.recommendations import (
     check_ndk_api,
@@ -54,8 +53,7 @@ class TestRecommendations(unittest.TestCase):
     @unittest.skipIf(running_in_py2, "`assertLogs` requires Python 3.4+")
     @mock.patch("pythonforandroid.recommendations.read_ndk_version")
     def test_check_ndk_version_greater_than_recommended(self, mock_read_ndk):
-        _version_string = f"{MIN_NDK_VERSION + 1}.0.5232133"
-        mock_read_ndk.return_value = packaging.version.Version(_version_string)
+        mock_read_ndk.return_value.version = [MAX_NDK_VERSION + 1, 0, 5232133]
         with self.assertLogs(level="INFO") as cm:
             check_ndk_version(self.ndk_dir)
         mock_read_ndk.assert_called_once_with(self.ndk_dir)
@@ -78,8 +76,7 @@ class TestRecommendations(unittest.TestCase):
 
     @mock.patch("pythonforandroid.recommendations.read_ndk_version")
     def test_check_ndk_version_lower_than_recommended(self, mock_read_ndk):
-        _version_string = f"{MIN_NDK_VERSION - 1}.0.5232133"
-        mock_read_ndk.return_value = packaging.version.Version(_version_string)
+        mock_read_ndk.return_value.version = [MIN_NDK_VERSION - 1, 0, 5232133]
         with self.assertRaises(BuildInterruptingException) as e:
             check_ndk_version(self.ndk_dir)
         self.assertEqual(
@@ -127,9 +124,7 @@ class TestRecommendations(unittest.TestCase):
         mock_open_src_prop.assert_called_once_with(
             join(self.ndk_dir, "source.properties")
         )
-        assert version.major == 17
-        assert version.minor == 2
-        assert version.micro == 4988734
+        assert version == "17.2.4988734"
 
     @unittest.skipIf(running_in_py2, "`assertLogs` requires Python 3.4+")
     @mock.patch("pythonforandroid.recommendations.open")

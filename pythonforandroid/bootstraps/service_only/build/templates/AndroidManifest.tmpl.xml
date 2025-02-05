@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="{{ args.package }}"
       android:versionCode="{{ args.numeric_version }}"
       android:versionName="{{ args.version }}"
       android:installLocation="auto">
@@ -46,7 +47,6 @@
                  {% if args.backup_rules %}android:fullBackupContent="@xml/{{ args.backup_rules }}"{% endif %}
                  android:theme="{{args.android_apptheme}}{% if not args.window %}.Fullscreen{% endif %}"
                  android:hardwareAccelerated="true"
-                 android:usesCleartextTraffic="true"
                  android:extractNativeLibs="true" >
         {% for l in args.android_used_libs %}
         <uses-library android:name="{{ l }}" />
