@@ -14,7 +14,7 @@ class PygameCeRecipe(CompiledComponentsPythonRecipe):
     """
 
     version = '2.5.2'
-    url = 'https://github.com/pygame-community/pygame-ce/archive/{version}.tar.gz'
+    url = 'https://github.com/pygame-community/pygame-ce/archive/refs/tags/2.5.3.dev2.tar.gz'
 
     site_packages_name = 'pygame-ce'
     name = 'pygame-ce'
