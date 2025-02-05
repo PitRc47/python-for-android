@@ -13,15 +13,15 @@ class PygameCeRecipe(CompiledComponentsPythonRecipe):
         not part of the build. It's usable, but not complete.
     """
 
-    version = '2.3.0'
+    version = '2.5.2'
     url = 'https://github.com/pygame-community/pygame-ce/archive/{version}.tar.gz'
 
     site_packages_name = 'pygame-ce'
     name = 'pygame-ce'
 
     depends = ['sdl2', 'sdl2_image', 'sdl2_mixer', 'sdl2_ttf', 'setuptools', 'jpeg', 'png']
-    call_hostpython_via_targetpython = False  # Due to setuptools
-    install_in_hostpython = False
+    call_hostpython_via_targetpython = True  # Due to setuptools
+    install_in_hostpython = True
 
     def prebuild_arch(self, arch):
         super().prebuild_arch(arch)
