@@ -3,9 +3,6 @@ buildscript {
     repositories {
        google()
        jcenter()
-       maven {
-            url "https://maven.mozilla.org/maven2/"
-        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:8.1.1'
@@ -16,9 +13,6 @@ allprojects {
     repositories {
         google()
         jcenter()
-        maven {
-            url "https://maven.mozilla.org/maven2/"
-        }
         {%- for repo in args.gradle_repositories %}
         {{repo}}
         {%- endfor %}
@@ -90,8 +84,6 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
         {%- for option in args.compile_options %}
         {{option}}
         {%- endfor %}
@@ -117,7 +109,6 @@ android {
 }
 
 dependencies {
-    implementation "org.mozilla.geckoview:geckoview-stable:135.0.20250130195129"
     {%- for aar in aars %}
     implementation(name: '{{ aar }}', ext: 'aar')
     {%- endfor -%}
