@@ -1,8 +1,15 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
+ext {
+    geckoviewChannel = "nightly"
+    geckoviewVersion = "70.0.20190712095934"
+}
 buildscript {
     repositories {
        google()
        jcenter()
+       maven {
+            url "https://maven.mozilla.org/maven2/"
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:8.1.1'
@@ -13,6 +20,9 @@ allprojects {
     repositories {
         google()
         jcenter()
+        maven {
+            url "https://maven.mozilla.org/maven2/"
+        }
         {%- for repo in args.gradle_repositories %}
         {{repo}}
         {%- endfor %}
@@ -109,6 +119,7 @@ android {
 }
 
 dependencies {
+    implementation "org.mozilla.geckoview:geckoview-${geckoviewChannel}:${geckoviewVersion}"
     {%- for aar in aars %}
     implementation(name: '{{ aar }}', ext: 'aar')
     {%- endfor -%}
