@@ -1,7 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 ext {
-    geckoviewChannel = "nightly"
-    geckoviewVersion = "70.0.20190712095934"
+    geckoviewChannel = "stable"
+    geckoviewVersion = "90.0.20210729144040"
 }
 buildscript {
     repositories {
