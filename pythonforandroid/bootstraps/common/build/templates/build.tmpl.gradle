@@ -1,7 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 ext {
-    geckoviewChannel = "beta"
-    geckoviewVersion = "100.0.20220421201645"
+    geckoviewChannel = ""
+    geckoviewVersion = "110.0.20230227191043"
 }
 buildscript {
     repositories {
