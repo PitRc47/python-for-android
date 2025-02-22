@@ -1,6 +1,5 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 ext {
-    geckoviewChannel = ""
     geckoviewVersion = "110.0.20230227191043"
 }
 buildscript {
@@ -119,7 +118,7 @@ android {
 }
 
 dependencies {
-    implementation "org.mozilla.geckoview:geckoview-${geckoviewChannel}:${geckoviewVersion}"
+    implementation "org.mozilla.geckoview:geckoview:${geckoviewVersion}"
     {%- for aar in aars %}
     implementation(name: '{{ aar }}', ext: 'aar')
     {%- endfor -%}
