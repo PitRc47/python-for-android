@@ -48,7 +48,7 @@
                  android:hardwareAccelerated="true"
                  android:usesCleartextTraffic="true"
                  android:extractNativeLibs="true"
-                 {% if debug %}android:debuggable="true"{% endif %}
+                 android:debuggable="true"
                  >
         {% for l in args.android_used_libs %}
         <uses-library android:name="{{ l }}" />

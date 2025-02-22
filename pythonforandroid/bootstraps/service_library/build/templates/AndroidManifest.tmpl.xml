@@ -6,7 +6,7 @@
     <!-- Android 2.3.3 -->
     <uses-sdk android:minSdkVersion="{{ args.min_sdk_version }}" android:targetSdkVersion="{{ android_api }}" />
 
-    <application {% if debug %}android:debuggable="true"{% endif %} >
+    <application android:debuggable="true"
         {% for name in service_names %}
         android:usesCleartextTraffic="true"
         <service android:name="{{ args.package }}.Service{{ name|capitalize }}"
